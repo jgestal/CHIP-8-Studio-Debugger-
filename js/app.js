@@ -105,7 +105,7 @@ export class App {
     const urlParams = new URLSearchParams(window.location.search);
     const requestedTheme = urlParams.get('theme');
     if (requestedTheme && this.themeManager) {
-      this.themeManager.setTheme(requestedTheme);
+      this.themeManager.applyTheme(requestedTheme);
       const themeSelect = document.getElementById('theme-select');
       if (themeSelect) themeSelect.value = requestedTheme;
     }
