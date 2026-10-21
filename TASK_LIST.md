@@ -139,4 +139,24 @@
     - Solution: When `chkTraceAutoscroll.checked` is false, DOM appending is frozen during continuous execution, preserving the exact scroll position and lines the user is inspecting.
     - Re-checking "Auto-scroll" immediately flushes the latest memory buffer (`this.traceHistory`) and scrolls smoothly to the bottom.
 
+- [x] **Phase 12: GitHub Publishing Plan Execution & Bilingual Release Suite**
+  - [x] **Git Repository Hygiene & Initialization**:
+    - Created standard `.gitignore` covering macOS (`.DS_Store`), temporary files, logs, and IDE caches.
+    - Created official open source `LICENSE` (MIT License) under the name `jgestal` (2026).
+    - Initialized Git repository on `main` branch and linked remote origin `https://github.com/jgestal/CHIP-8-Studio-Debugger.git`.
+    - Executed initial commit with Conventional Commits: `feat: initial release of CHIP-8 Studio & Debugger Workstation`.
+  - [x] **Visual Asset Generation (Screenshots in `docs/assets/`)**:
+    - Automated high-resolution screenshots using headless Chrome across 5 key views:
+      - `docs/assets/01-workstation-overview.png`: Complete workstation layout with monitor, telemetry controls, 4x4 keypad, and disassembler.
+      - `docs/assets/02-crt-tv-fullscreen.png`: Vintage 1970s CRT television chassis with scanlines, phosphor glow, and rotary knobs.
+      - `docs/assets/03-inspector-tabs-nav.png`: Inspector tabs navigation bar with arrow buttons and dropdown indicator.
+      - `docs/assets/04-disassembler-explainer.png`: Terminal green theme with live didactic opcode explainer and register diff tags.
+      - `docs/assets/05-themes-showcase.png`: NES classic theme showcasing color palette tokens.
+  - [x] **Bilingual Documentation Suite**:
+    - Created primary `README.md` (English) with language switcher, embedded showcase screenshots, badges, controls cheatsheet, and quickstart.
+    - Created secondary `README.es.md` (Español) with full Spanish technical documentation.
+    - Created `CONTRIBUTING.md` with guidelines for community contributions, new ROM submissions, and bug reports.
+    - Verified all 24/24 unit test suites passing cleanly.
+
+
 
