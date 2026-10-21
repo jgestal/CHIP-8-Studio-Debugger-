@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="massung">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHIP-8 Studio & Debugger | Retro Emulation Suite</title>
+  <meta name="description" content="Professional CHIP-8 Emulator & Debugger in Pure Vanilla JS with live disassembler, didactic explainer, time-travel rewind, memory heatmap, and authentic retro themes (NES, SNES, Terminal, Game Boy).">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ===================================================================== -->
+  <!-- TOP GLOBAL TOOLBAR (CLEAN, MINIMAL & SYSTEM-LEVEL)                     -->
+  <!-- ===================================================================== -->
+  <header class="top-bar">
+    <div class="brand-section">
+      <div class="brand-badge-icon">8</div>
+      <span class="brand-logo">CHIP-8 STUDIO</span>
+      <span class="brand-tag">v2.1 PRO</span>
+    </div>
+
+    <!-- Center: ROM Selection -->
+    <div class="toolbar-center">
+      <select id="rom-selector" class="select-retro" title="Select ROM"></select>
+      <button type="button" id="btn-open-local" class="btn btn-sm" data-tooltip="Load local .ch8 ROM file">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span data-i18n="openLocalRom">Open ROM</span>
+      </button>
+      <input type="file" id="file-input" accept=".ch8,.rom" style="display: none;">
+    </div>
+
+    <!-- Right: Theme, CRT, Save States, Language -->
+    <div class="toolbar-right">
+      <!-- Theme Selector -->
+      <div class="theme-picker-group">
+        <span class="toolbar-icon-label" title="Theme">🎨</span>
+        <select id="select-theme" class="select-retro" data-tooltip="Switch system visual theme">
+          <option value="massung">Massung Slate (1977)</option>
+          <option value="nes">NES Classic (1983)</option>
+          <option value="snes">SNES Super Famicom (1991)</option>
+          <option value="terminal">Terminal VT220 (Phosphor)</option>
+          <option value="gameboy">Game Boy DMG-01 (1989)</option>
+          <option value="cyberpunk">Cyberpunk Synthwave</option>
+        </select>
+      </div>
+
+      <!-- CRT Scanlines Filter Toggle -->
+      <button type="button" id="btn-crt" class="btn btn-sm" data-tooltip="Toggle retro CRT scanlines and bloom">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span data-i18n="crtFilter">CRT</span>
+      </button>
+
+      <!-- Save States Modal -->
+      <button type="button" id="btn-save-modal" class="btn btn-sm" data-tooltip="Save / Load State slots [F1/F5]">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span data-i18n="saveState">States</span>
+      </button>
+
+      <!-- Keyboard Shortcuts & Controls Map Modal -->
+      <button type="button" id="btn-shortcuts-modal" class="btn btn-sm" data-tooltip="Keyboard controls & hotkeys map [?]">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="18" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+        <span data-i18n="shortcutsBtn">Keys</span>
+      </button>
+
+      <!-- Bilingual Toggle (EN / ES) -->
+      <button type="button" id="btn-lang" class="btn btn-sm btn-lang" data-tooltip="Toggle Language (English / Español)">🇬🇧 EN</button>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN WORKSTATION GRID LAYOUT                                          -->
+  <!-- ===================================================================== -->
+  <main id="app-container" class="app-container">
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- ------------------------------------------------------------------- -->
+    <!-- LEFT COLUMN: DISPLAY, PLAYBACK DASHBOARD & DEDICATED 4x4 KEYPAD     -->
+    <!-- ------------------------------------------------------------------- -->
+    <section class="screen-deck" id="screen-deck">
+      
+      <!-- 1. Display Monitor Panel -->
+      <div class="panel panel-display" id="panel-display">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-title" data-i18n="quadrantDisplay">1. DISPLAY MONITOR (64×32)</span>
+          </div>
+          <div class="panel-header-actions">
+            <div class="telemetry-compact">
+              <span id="fps-display" class="chip chip-fps">60 FPS</span>
+              <span id="status-badge" class="badge badge-status" data-i18n="statusRunning">RUNNING</span>
+            </div>
+            <button type="button" class="panel-header-btn btn-collapse" data-panel="panel-display" data-tooltip="Minimize / Expand panel" title="Minimize / Expand panel">−</button>
+          </div>
+        </div>
+
+        <div class="display-wrapper" id="display-wrapper">
+          <div class="tv-stage" id="tv-stage">
+            <div class="crt-tv-chassis" id="crt-tv-chassis">
+
+              <!-- Fullscreen Exit Floating Hint Bar -->
+              <div class="tv-exit-toast" id="tv-exit-toast">
+                <span>📺 CRT RetroVision &bull; Press <kbd>ESC</kbd> or <kbd>F11</kbd> to exit fullscreen</span>
+              </div>
+
+              <!-- Top TV Cabinet Ridge with Ventilation Louvers -->
+              <div class="tv-top-ridge">
+                <div class="tv-vents-group">
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                  <span class="tv-vent-slot"></span>
+                </div>
+              </div>
+
+              <!-- Main TV Body: Curved Screen Tube + Vintage Right Control Deck -->
+              <div class="tv-main-body">
+                <!-- Tube Housing Bezel -->
+                <div class="tv-tube-housing">
+                  <div class="canvas-container" id="canvas-container">
+                    <canvas id="game-canvas"></canvas>
+                    <div id="crt-overlay" class="crt-overlay"></div>
+                    <!-- Curved Glass Vignette & Highlight Overlays -->
+                    <div class="crt-glass-reflection"></div>
+                    <div class="crt-glass-vignette"></div>
+                  </div>
+                </div>
+
+                <!-- Retro Control Deck on the Right Side -->
+                <div class="tv-control-panel">
+                  <!-- Vintage Metallic Badge Plate -->
+                  <div class="tv-brand-plate">
+                    <div class="tv-brand-logo">★ RETRO-VISION ★</div>
+                    <div class="tv-brand-model">MODEL CT-1977</div>
+                  </div>
+
+                  <!-- Speaker Grille -->
+                  <div class="tv-speaker-section">
+                    <div class="tv-speaker-slat"></div>
+                    <div class="tv-speaker-slat"></div>
+                    <div class="tv-speaker-slat"></div>
+                    <div class="tv-speaker-slat"></div>
+                    <div class="tv-speaker-slat"></div>
+                    <div class="tv-speaker-slat"></div>
+                  </div>
+
+                  <!-- Rotary Dial Knobs -->
+                  <div class="tv-dials-section">
+                    <div class="tv-dial-control">
+                      <span class="tv-dial-tag">VHF CH</span>
+                      <div class="tv-knob knob-vhf">
+                        <div class="tv-knob-notch"></div>
+                      </div>
+                    </div>
+                    <div class="tv-dial-control">
+                      <span class="tv-dial-tag">UHF / VOL</span>
+                      <div class="tv-knob knob-uhf">
+                        <div class="tv-knob-notch"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Power Section with Glowing LED & Tactile Exit Button -->
+                  <div class="tv-power-cluster">
+                    <div class="tv-power-indicator">
+                      <span class="tv-led-indicator"></span>
+                      <span class="tv-led-label">POWER</span>
+                    </div>
+                    <button type="button" class="tv-power-switch" id="btn-tv-power-exit" title="Exit Fullscreen [Esc]">
+                      <span>POWER / ESC</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bottom TV Chassis & Support Feet -->
+              <div class="tv-bottom-chassis">
+                <div class="tv-chassis-decal">SOLID STATE &bull; HIGH RESOLUTION 64×32 DISPLAY MONITOR</div>
+                <div class="tv-cabinet-feet">
+                  <span class="tv-foot"></span>
+                  <span class="tv-foot"></span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Integrated Game Playback Control Dashboard (UNDER SCREEN) -->
+        <div class="playback-dashboard">
+          <!-- Transport Buttons -->
+          <div class="transport-group">
+            <button type="button" id="btn-play-pause" class="btn-icon btn-action-play" data-tooltip="Resume / Pause execution [P / Esc]">
+              <span class="icon-slot" id="icon-play-pause">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </span>
+              <span class="key-badge">P</span>
+            </button>
+
+            <!-- Step Back single instruction -->
+            <button type="button" id="btn-step-back" class="btn-icon" data-tooltip="Step back one instruction [F8]">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+              <span class="key-badge">F8</span>
+            </button>
+
+            <button type="button" id="btn-step" class="btn-icon" data-tooltip="Step single instruction [F10]">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+              <span class="key-badge">F10</span>
+            </button>
+
+            <button type="button" id="btn-step-frame" class="btn-icon" data-tooltip="Advance one frame 1/60s [F9]">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+              <span class="key-badge">F9</span>
+            </button>
+
+            <button type="button" id="btn-reset" class="btn-icon" data-tooltip="Restart ROM">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            </button>
+
+            <button type="button" id="btn-rewind" class="btn-icon btn-rewind" data-tooltip="Hold to Rewind Time [Backspace]">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+              <span class="key-badge">⌫</span>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="dash-divider"></div>
+
+          <!-- CPU Speed Slider -->
+          <div class="speed-group" data-tooltip="Adjust CPU clock speed in Hz">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="speed-icon"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <input type="range" id="slider-speed" min="10" max="1500" step="10" value="500">
+            <span id="speed-value" class="speed-readout">500 Hz</span>
+          </div>
+
+          <!-- Divider -->
+          <div class="dash-divider"></div>
+
+          <!-- Audio, Screenshot & Fullscreen Utilities -->
+          <div class="util-group">
+            <button type="button" id="btn-audio-toggle" class="btn-icon" data-tooltip="Toggle Audio Beeper">
+              <span id="audio-icon-slot">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              </span>
+            </button>
+
+            <!-- Screenshot Capture Button -->
+            <button type="button" id="btn-screenshot" class="btn-icon" data-tooltip="Capture Screenshot (PNG) [F12 / Alt+S]">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
+
+            <button type="button" id="btn-fullscreen" class="btn-icon" data-tooltip="Toggle Fullscreen Mode [F11 / Alt+Enter]">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resizer handle between Display and Keypad -->
+      <div id="resizer-left-row" class="gutter-row" title="Drag to resize keypad height"></div>
+
+      <!-- 3. Dedicated CHIP-8 4x4 Hex Keypad Deck -->
+      <div class="panel panel-keypad-deck" id="panel-keypad-deck">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-title" data-i18n="quadrantKeypad">CHIP-8 4×4 HEX KEYPAD (COSMAC VIP)</span>
+            <span class="keypad-mapping-hint" data-i18n="keypadHelp">PC mapping: 1-4, Q-R, A-F, Z-V or Gamepad</span>
+          </div>
+          <div class="panel-header-actions">
+            <button type="button" class="panel-header-btn btn-collapse" data-panel="panel-keypad-deck" data-tooltip="Minimize / Expand panel" title="Minimize / Expand panel">−</button>
+          </div>
+        </div>
+        <div class="panel-body keypad-body">
+          <div id="virtual-keypad" class="virtual-keypad-grid"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Resizer handle between Left Column and Right Column -->
+    <div id="resizer-col" class="gutter-col" title="Drag to resize columns"></div>
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- RIGHT COLUMN: DISASSEMBLER, LIVE EXPLAINER, HARDWARE & MEMORY       -->
+    <!-- ------------------------------------------------------------------- -->
+    <section class="debug-deck" id="debug-deck">
+      
+      <!-- Top-Right: Disassembler & Didactic Explainer -->
+      <div class="panel panel-disasm" id="panel-disasm">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-title" data-i18n="quadrantDisasm">2. DISASSEMBLER & STEP ENGINE</span>
+            <span class="header-hint">(Click address to toggle Breakpoint)</span>
+          </div>
+          <div class="panel-header-actions">
+            <button type="button" class="panel-header-btn btn-collapse" data-panel="panel-disasm" data-tooltip="Minimize / Expand panel" title="Minimize / Expand panel">−</button>
+          </div>
+        </div>
+
+        <div class="panel-body disasm-body">
+          <!-- Live Didactic Explainer Card -->
+          <div class="explainer-card">
+            <div class="explainer-header">
+              <span class="explainer-title" data-i18n="didacticTitle">Live Didactic Explanation</span>
+              <span class="explainer-code"><span id="explainer-mnemonic">---</span> <span id="explainer-operands"></span></span>
+            </div>
+            <div id="explainer-text" class="explainer-body" data-i18n="didacticEmpty">
+              Pause or step through execution to inspect instruction mechanics in detail.
+            </div>
+            <div id="reg-diff-tags" class="reg-diff-tags"></div>
+          </div>
+
+          <!-- Interactive Instruction Stream -->
+          <div id="disasm-list" class="disasm-list"></div>
+        </div>
+      </div>
+
+      <!-- Resizer handle between Disassembler and Inspector -->
+      <div id="resizer-right-row" class="gutter-row" title="Drag to resize inspector height"></div>
+
+      <!-- Bottom-Right: Hardware Registers, Trace Log, ROM Info, Memory Heatmap & System Tabs -->
+      <div class="panel panel-inspector" id="panel-inspector">
+        <div class="panel-header inspector-header">
+          <div class="panel-tabs-container" id="inspector-tabs-container">
+            <button type="button" class="tab-nav-arrow btn-tab-prev" id="btn-tab-prev" data-tooltip="Pestaña anterior" aria-label="Previous tab">‹</button>
+            <div class="panel-tabs-scroll-area" id="panel-tabs-scroll-area">
+              <div class="panel-tabs" id="inspector-tabs">
+                <button type="button" class="tab-btn active" data-tab="tab-hw-registers" data-index="1" data-i18n="tabRegisters">Registers</button>
+                <button type="button" class="tab-btn" data-tab="tab-content-history" data-index="2" data-i18n="tabHistory">Trace Log</button>
+                <button type="button" class="tab-btn" data-tab="tab-content-info" data-index="3" data-i18n="tabRomInfo">ROM Info</button>
+                <button type="button" class="tab-btn" data-tab="tab-content-console" data-index="4" data-i18n="tabConsole">Console TTY</button>
+                <button type="button" class="tab-btn" data-tab="tab-content-roms" data-index="5" data-i18n="tabRoms">ROM Catalog</button>
+                <button type="button" class="tab-btn" data-tab="tab-hw-memory" data-index="6" data-i18n="tabMemory">RAM Heatmap</button>
+                <button type="button" class="tab-btn" data-tab="tab-hw-sprite" data-index="7" data-i18n="tabSprites">Sprite in I</button>
+              </div>
+            </div>
+            <button type="button" class="tab-nav-arrow btn-tab-next" id="btn-tab-next" data-tooltip="Siguiente pestaña" aria-label="Next tab">›</button>
+            <div class="tabs-menu-wrapper" id="tabs-menu-wrapper">
+              <button type="button" class="tab-menu-btn" id="btn-tabs-menu" data-tooltip="Ver catálogo de pestañas" aria-label="All tabs list">
+                <span class="tab-menu-counter" id="tab-menu-counter">1/7</span>
+                <span class="tab-menu-caret">▾</span>
+              </button>
+              <div class="tabs-menu-dropdown" id="tabs-menu-dropdown"></div>
+            </div>
+          </div>
+          <div class="panel-header-actions">
+            <button type="button" id="btn-clear-console" class="btn btn-xs" data-i18n="clearConsole">Clear</button>
+            <button type="button" class="panel-header-btn btn-collapse" data-panel="panel-inspector" data-tooltip="Minimize / Expand panel" title="Minimize / Expand panel">−</button>
+          </div>
+        </div>
+
+        <div class="panel-body inspector-body">
+          
+          <!-- Tab 1: Registers & Stack -->
+          <div id="tab-hw-registers" class="tab-content active">
+            <div class="registers-layout">
+              <!-- General Purpose Registers V0 - VF -->
+              <div id="registers-grid" class="registers-grid"></div>
+
+              <!-- Special Hardware Registers -->
+              <div class="special-registers">
+                <div class="spec-cell"><span class="spec-title">I (Index)</span><span id="reg-i" class="spec-val">#0000</span></div>
+                <div class="spec-cell"><span class="spec-title">PC (Prog)</span><span id="reg-pc" class="spec-val">#0200</span></div>
+                <div class="spec-cell"><span class="spec-title">SP (Stack)</span><span id="reg-sp" class="spec-val">#00</span></div>
+                <div class="spec-cell"><span class="spec-title">DT (Delay)</span><span id="reg-dt" class="spec-val">#00</span></div>
+                <div class="spec-cell"><span class="spec-title">ST (Sound)</span><span id="reg-st" class="spec-val">#00</span></div>
+              </div>
+
+              <!-- Stack Levels -->
+              <div class="stack-section">
+                <span class="section-micro-title" data-i18n="stackTitle">Stack (Return Addresses):</span>
+                <div id="stack-view" class="stack-preview"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Execution Trace Log (History) -->
+          <div id="tab-content-history" class="tab-content">
+            <div class="trace-toolbar">
+              <span class="trace-counter"><strong id="trace-count">0</strong> <span data-i18n="instructionsCount">instructions executed</span></span>
+              <div class="trace-actions">
+                <label class="trace-autoscroll-toggle">
+                  <input type="checkbox" id="chk-trace-autoscroll" checked>
+                  <span data-i18n="autoScroll">Auto-scroll</span>
+                </label>
+                <button type="button" id="btn-clear-trace" class="btn btn-xs" data-i18n="clearTrace">Clear</button>
+              </div>
+            </div>
+            <div class="trace-table-header">
+              <span class="th-step">#</span>
+              <span class="th-pc">PC</span>
+              <span class="th-op">Opcode</span>
+              <span class="th-asm">Instruction</span>
+              <span class="th-diff">Effect</span>
+            </div>
+            <div id="trace-log-list" class="trace-log-list"></div>
+          </div>
+
+          <!-- Tab: Active ROM Details & Technical Specs -->
+          <div id="tab-content-info" class="tab-content">
+            <div class="rom-info-card" id="rom-info-card">
+              <div class="rom-info-header">
+                <div class="rom-badge-pill">CH8</div>
+                <div class="rom-header-meta">
+                  <h3 id="info-title" class="rom-info-title">No ROM Loaded</h3>
+                  <span id="info-meta" class="rom-info-subtitle">Select a ROM or drag & drop a .ch8 file</span>
+                </div>
+              </div>
+              <div class="rom-info-specs">
+                <div class="spec-tile"><span class="spec-k" data-i18n="romAuthor">Author:</span> <strong id="info-author" class="spec-v">---</strong></div>
+                <div class="spec-tile"><span class="spec-k" data-i18n="romYear">Year:</span> <strong id="info-year" class="spec-v">---</strong></div>
+                <div class="spec-tile"><span class="spec-k" data-i18n="romSize">Size:</span> <strong id="info-size" class="spec-v">---</strong></div>
+                <div class="spec-tile"><span class="spec-k" data-i18n="romCategory">Category:</span> <strong id="info-cat" class="spec-v">---</strong></div>
+              </div>
+              <div class="rom-controls-box">
+                <span class="spec-k" data-i18n="romControls">Recommended Controls:</span>
+                <div id="info-controls" class="controls-pill-box">Hex Keypad (1-4, Q-R, A-F, Z-V)</div>
+              </div>
+              <div class="rom-desc-box">
+                <span class="spec-k" data-i18n="romDesc">Description:</span>
+                <p id="info-desc" class="rom-desc-text">---</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: System TTY Console -->
+          <div id="tab-content-console" class="tab-content">
+            <div id="tty-console" class="tty-console"></div>
+          </div>
+
+          <!-- Tab 3: ROM Explorer Catalog -->
+          <div id="tab-content-roms" class="tab-content">
+            <div class="rom-catalog-wrapper">
+              <div class="rom-search-bar">
+                <input type="text" id="rom-search-input" placeholder="Search ROM..." class="select-retro" style="flex: 1;">
+                <select id="rom-category-filter" class="select-retro">
+                  <option value="all">All Categories</option>
+                  <option value="games">Games</option>
+                  <option value="demos">Demos</option>
+                  <option value="programs">Programs</option>
+                  <option value="tests">Official Tests</option>
+                </select>
+              </div>
+              <div id="rom-catalog-list" class="rom-catalog-list"></div>
+            </div>
+          </div>
+
+          <!-- Tab 4: 4KB RAM Memory Heatmap -->
+          <div id="tab-hw-memory" class="tab-content">
+            <div class="heatmap-wrapper">
+              <canvas id="memory-canvas" width="256" height="256"></canvas>
+              <div id="memory-tooltip" class="heatmap-tooltip">Hover over memory cells to inspect bytes & roles</div>
+              <div class="heatmap-legend" data-i18n="heatmapLegend">
+                Green: Executed Code | Blue: Data Read | Red: Memory Write | Gray: Untouched
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 5: Sprite in I & Audio Visualizer -->
+          <div id="tab-hw-sprite" class="tab-content">
+            <div class="sprite-and-audio-grid">
+              <div class="sprite-view-box">
+                <div class="sprite-title"><span data-i18n="spriteViewerTitle">Sprite at Address I:</span> <strong id="sprite-addr-label">I = 0x0000</strong></div>
+                <canvas id="sprite-canvas"></canvas>
+                <div class="micro-caption" data-i18n="spriteViewerHelp">Graphical preview of memory bytes at pointer I</div>
+              </div>
+
+              <div class="audio-view-box">
+                <div class="sprite-title" data-i18n="audioTitle">Web Audio Waveform (440 Hz):</div>
+                <canvas id="audio-osc-canvas" width="260" height="70"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: SAVE STATES & PARTIDAS                                         -->
+  <!-- ===================================================================== -->
+  <div id="save-modal" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-header">
+        <strong data-i18n="saveState">Save States & Game Sessions</strong>
+        <button type="button" id="btn-close-save-modal" class="btn btn-xs">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="save-slots-container" class="save-slots-grid"></div>
+        <div class="modal-actions-row">
+          <button type="button" id="btn-export-json" class="btn btn-primary" style="flex: 1;" data-i18n="exportState">Export State (JSON)</button>
+          <button type="button" id="btn-import-json" class="btn" style="flex: 1;" data-i18n="importState">Import State (JSON)</button>
+          <input type="file" id="json-file-input" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: KEYBOARD CONTROLS & SHORTCUTS                                  -->
+  <!-- ===================================================================== -->
+  <div id="shortcuts-modal" class="modal-backdrop">
+    <div class="modal-window shortcuts-window">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="18" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+          <strong data-i18n="shortcutsTitle">Keyboard Controls & Shortcut Mapping</strong>
+        </div>
+        <button type="button" id="btn-close-shortcuts-modal" class="btn btn-xs">✕</button>
+      </div>
+      <div class="modal-body shortcuts-body">
+        <div class="shortcuts-columns">
+          <!-- Column 1: CHIP-8 4x4 Hex Gamepad -->
+          <div class="shortcut-box">
+            <h4 class="shortcut-box-title" data-i18n="gamePadTitle">🎮 Game Controls (CHIP-8 4×4 Hex Pad)</h4>
+            <p class="shortcut-box-desc" data-i18n="gamePadDesc">Dedicated game inputs with zero interface conflict.</p>
+            <div class="keypad-matrix-preview">
+              <table class="keypad-reference-table">
+                <thead>
+                  <tr>
+                    <th>COSMAC VIP (Hex)</th>
+                    <th>PC Keyboard</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>1  2  3  C</code></td><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></td></tr>
+                  <tr><td><code>4  5  6  D</code></td><td><kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> <kbd>R</kbd></td></tr>
+                  <tr><td><code>7  8  9  E</code></td><td><kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd></td></tr>
+                  <tr><td><code>A  0  B  F</code></td><td><kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd> <kbd>V</kbd></td></tr>
+                </tbody>
+              </table>
+              <div class="keypad-notes">
+                <span><kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd> Universal Direction Arrows (Keys 2, 8, 4, 6)</span>
+                <span><kbd>Space</kbd> Action / Fire Key (Key 5)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: System & Debugger Hotkeys -->
+          <div class="shortcut-box">
+            <h4 class="shortcut-box-title" data-i18n="sysShortcutsTitle">⚡ Interface & Debugger Shortcuts</h4>
+            <p class="shortcut-box-desc" data-i18n="sysShortcutsDesc">Workstation controls mapped without game key collision.</p>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr>
+                  <td data-i18n="scPause">Play / Pause Execution</td>
+                  <td><kbd>P</kbd> / <kbd>Esc</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scRewind">Hold to Rewind Time (Live Rewind)</td>
+                  <td><kbd>Backspace</kbd> / <kbd>Tab</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scStepBack">Step Back One Instruction</td>
+                  <td><kbd>F8</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scStep">Step Single Instruction</td>
+                  <td><kbd>F10</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scStepFrame">Advance Frame (1/60s)</td>
+                  <td><kbd>F9</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scFullscreen">Toggle Fullscreen Mode</td>
+                  <td><kbd>F11</kbd> / <kbd>Alt</kbd>+<kbd>Enter</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scScreenshot">Capture Screenshot (PNG)</td>
+                  <td><kbd>F12</kbd> / <kbd>Alt</kbd>+<kbd>S</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scSave">Quick Save State (Slot 1)</td>
+                  <td><kbd>F1</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="scLoad">Quick Load State (Slot 1)</td>
+                  <td><kbd>F5</kbd></td>
+                </tr>
+                <tr>
+                  <td data-i18n="shortcutsBtn">Controls Help Dialog</td>
+                  <td><kbd>?</kbd></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrapping Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

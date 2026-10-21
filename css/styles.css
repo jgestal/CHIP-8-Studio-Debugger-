@@ -1,0 +1,2342 @@
+/**
+ * ============================================================================
+ * CHIP-8 STUDIO & DEBUGGER - COMPREHENSIVE STYLESHEET
+ * ============================================================================
+ * Clean Architecture design tokens, theme system (NES, SNES, Terminal, Game Boy,
+ * Massung, Cyberpunk), icon-driven playback dashboard, and dedicated 4x4 keypad.
+ */
+
+/* ==========================================================================
+   DEFAULT DESIGN TOKENS (FALLBACK / MASSUNG SLATE WORKSTATION)
+   ========================================================================== */
+:root {
+  --bg-main: #0e1419;
+  --bg-panel: #161f26;
+  --bg-panel-dark: #11181e;
+  --border-color: #263540;
+  --text-primary: #e2e8f0;
+  --text-muted: #8b9bb4;
+  --accent-primary: #38bdf8;
+  --accent-secondary: #0284c7;
+  --keypad-bg: #1e293b;
+  --keypad-active: #0284c7;
+  --btn-bg: #1e293b;
+  --btn-border: #334155;
+  --crt-glow: 0 0 10px rgba(56, 189, 248, 0.25);
+  
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ==========================================================================
+   TOOLTIP SYSTEM (SMART FLOATING TOOLTIP ENGINE)
+   ========================================================================== */
+[data-tooltip] {
+  position: relative;
+}
+
+/* Disable pseudo-element tooltips to prevent clipping by parent frames or screen edges */
+[data-tooltip]:hover::after {
+  display: none !important;
+}
+
+/* Floating Tooltip Element appended directly to body */
+#smart-floating-tooltip {
+  position: fixed;
+  z-index: 1000000;
+  pointer-events: none;
+  background-color: #020617;
+  color: #f8fafc;
+  font-size: 11px;
+  line-height: 1.35;
+  padding: 5px 9px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  font-family: inherit;
+  font-weight: 500;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  visibility: hidden;
+}
+
+#smart-floating-tooltip.visible {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+/* ==========================================================================
+   GLOBAL HEADER & TOOLBAR
+   ========================================================================== */
+.top-bar {
+  background-color: var(--bg-panel-dark);
+  border-bottom: 1px solid var(--border-color);
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 46px;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.brand-badge-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background-color: var(--accent-primary);
+  color: #000;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.brand-logo {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--text-primary);
+  letter-spacing: 0.8px;
+}
+
+.brand-tag {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border-color);
+}
+
+.toolbar-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 480px;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.theme-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-icon-label {
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   BUTTONS & INPUTS
+   ========================================================================== */
+button, select, input {
+  font-family: var(--font-mono);
+}
+
+.btn {
+  background-color: var(--btn-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--btn-border);
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn:hover {
+  filter: brightness(1.2);
+  border-color: var(--accent-primary);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-sm {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.btn-xs {
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+.btn-primary {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-primary);
+  color: #fff;
+}
+
+.btn-icon {
+  background-color: var(--btn-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--btn-border);
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  user-select: none;
+  min-width: 32px;
+  height: 28px;
+}
+
+.btn-icon:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-primary);
+}
+
+.btn-action-play {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-primary);
+  color: #fff;
+}
+
+.btn-action-play.btn-playing {
+  background-color: #b45309;
+  border-color: #d97706;
+}
+
+.btn-rewind.active {
+  background-color: #be123c !important;
+  border-color: #f43f5e !important;
+  color: #fff !important;
+  animation: rewind-pulse 0.6s infinite alternate;
+}
+
+.btn-rewind.disabled-paused {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+@keyframes rewind-pulse {
+  from { box-shadow: 0 0 4px #f43f5e; }
+  to { box-shadow: 0 0 14px #f43f5e; }
+}
+
+.key-badge {
+  font-size: 8px;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 1px 3px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.select-retro {
+  background-color: var(--btn-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--btn-border);
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   APP WORKSTATION LAYOUT (ADAPTABLE 2-COLUMN DECK WITH RESIZERS)
+   ========================================================================== */
+:root {
+  --left-deck-width: 50%;
+  --keypad-height: 180px;
+  --inspector-height: 310px;
+}
+
+.app-container {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 46px);
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+.screen-deck {
+  width: var(--left-deck-width, 50%);
+  min-width: 280px;
+  max-width: calc(100% - 280px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--border-color);
+}
+
+.debug-deck {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--border-color);
+}
+
+/* Draggable Splitters / Gutters */
+.gutter-col {
+  width: 6px;
+  background-color: var(--border-color);
+  cursor: col-resize;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 30;
+  transition: background-color 0.15s ease;
+}
+
+.gutter-col:hover, .gutter-col.resizing {
+  background-color: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+.gutter-row {
+  height: 6px;
+  background-color: var(--border-color);
+  cursor: row-resize;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 30;
+  transition: background-color 0.15s ease;
+}
+
+.gutter-row:hover, .gutter-row.resizing {
+  background-color: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+.panel {
+  background-color: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: flex 0.2s ease;
+}
+
+.panel-header {
+  background-color: var(--bg-panel-dark);
+  border-bottom: 1px solid var(--border-color);
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  flex-shrink: 0;
+  user-select: none;
+  gap: 8px;
+}
+
+.panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: 12px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel-header-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: bold;
+  transition: all 0.15s ease;
+}
+
+.panel-header-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* Collapsed Panel State */
+.panel.is-collapsed {
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  flex: 0 0 30px !important;
+}
+
+.panel.is-collapsed .panel-body,
+.panel.is-collapsed .playback-dashboard {
+  display: none !important;
+}
+
+.panel-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.header-hint {
+  font-size: 9px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.panel-body {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* ==========================================================================
+   PANEL 1: GAME DISPLAY & MONITOR
+   ========================================================================== */
+.panel-display {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.display-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+  padding: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==========================================================================
+   TV STAGE & CHASSIS (NORMAL WORKSTATION MODE)
+   ========================================================================== */
+.tv-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.crt-tv-chassis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.tv-main-body,
+.tv-tube-housing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* En modo normal de cuadrante, los componentes externos del chasis de TV quedan ocultos */
+.tv-top-ridge,
+.tv-control-panel,
+.tv-bottom-chassis,
+.tv-exit-toast,
+.crt-glass-reflection,
+.crt-glass-vignette {
+  display: none;
+}
+
+.canvas-container {
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+  border: 2px solid var(--border-color);
+  border-radius: 2px;
+}
+
+#game-canvas {
+  display: block;
+  width: 480px;
+  height: 240px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background-color: #000;
+}
+
+/* CRT Scanlines Overlay */
+.crt-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.4) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 4px, 6px 100%;
+  display: none;
+}
+
+.crt-overlay.active {
+  display: block;
+}
+
+.telemetry-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip {
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.chip-fps {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--accent-primary);
+}
+
+.badge-status {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   PANEL 2: INTEGRATED PLAYBACK DASHBOARD (DIRECTLY UNDER CANVAS)
+   ========================================================================== */
+.playback-dashboard {
+  background-color: var(--bg-panel-dark);
+  border-top: 1px solid var(--border-color);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.transport-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dash-divider {
+  width: 1px;
+  height: 22px;
+  background-color: var(--border-color);
+}
+
+.speed-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.speed-icon {
+  color: var(--accent-primary);
+}
+
+.speed-group input[type="range"] {
+  width: 80px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.speed-readout {
+  font-weight: bold;
+  color: var(--accent-primary);
+  min-width: 45px;
+}
+
+.util-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ==========================================================================
+   PANEL 3: DEDICATED 4x4 HEX KEYPAD DECK (COSMAC VIP)
+   ========================================================================== */
+.panel-keypad-deck {
+  height: var(--keypad-height, 180px);
+  min-height: 50px;
+  flex-shrink: 0;
+}
+
+.keypad-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+}
+
+.virtual-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.keypad-key-btn {
+  background-color: var(--keypad-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 4px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  user-select: none;
+  transition: all 0.1s ease;
+  position: relative;
+}
+
+.keypad-key-btn:hover {
+  filter: brightness(1.2);
+  border-color: var(--accent-primary);
+}
+
+.keypad-key-btn.active {
+  background-color: var(--keypad-active) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px var(--accent-primary);
+  transform: translateY(1px);
+}
+
+.key-center-hex {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.key-corner-pc {
+  font-size: 9px;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 1px 4px;
+  border-radius: 2px;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.keypad-mapping-hint {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   PANEL 4: DISASSEMBLER & LIVE EXPLAINER
+   ========================================================================== */
+.panel-disasm {
+  flex: 1;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+}
+
+.disasm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+
+/* Locked Fixed Height for Didactic Explainer: Eliminates Layout Shifts & Shaking */
+.explainer-card {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-primary);
+  padding: 6px 10px;
+  border-radius: 4px;
+  height: 84px;
+  min-height: 84px;
+  max-height: 84px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.explainer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.explainer-title {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  font-weight: bold;
+}
+
+.explainer-code {
+  font-size: 11px;
+  font-weight: bold;
+  color: #facc15;
+}
+
+.explainer-body {
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: 1.35;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.reg-diff-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-height: 18px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.diff-tag {
+  background-color: #14532d;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+.diff-i {
+  background-color: #701a75;
+  color: #f472b6;
+  border-color: #a21caf;
+}
+
+.disasm-list {
+  flex: 1;
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+.disasm-row {
+  display: grid;
+  grid-template-columns: 14px 50px 48px 48px 1fr;
+  align-items: center;
+  padding: 2px 6px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  user-select: none;
+}
+
+.disasm-row:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.bp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: transparent;
+  display: inline-block;
+}
+
+.bp-dot.active {
+  background-color: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+.disasm-addr { color: var(--text-muted); }
+.disasm-opcode { color: var(--text-primary); opacity: 0.8; }
+.disasm-mnemonic { color: #f59e0b; font-weight: bold; }
+.disasm-operands { color: var(--accent-primary); }
+
+.disasm-row.current-instruction {
+  background-color: #991b1b !important;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.disasm-row.current-instruction span {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   PANEL 5: HARDWARE REGISTERS, MEMORY & TABS
+   ========================================================================== */
+.panel-inspector {
+  height: var(--inspector-height, 310px);
+  min-height: 80px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panel Tabs Container & Navigation Bar */
+.panel-tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  height: 100%;
+}
+
+.panel-tabs-scroll-area {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  height: 100%;
+}
+
+.panel-tabs-scroll-area::before,
+.panel-tabs-scroll-area::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.panel-tabs-scroll-area::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-panel-dark), transparent);
+}
+
+.panel-tabs-scroll-area::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-panel-dark), transparent);
+}
+
+.panel-tabs-scroll-area.can-scroll-left::before {
+  opacity: 1;
+}
+
+.panel-tabs-scroll-area.can-scroll-right::after {
+  opacity: 1;
+}
+
+.panel-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 2px;
+  scroll-behavior: smooth;
+}
+
+.panel-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* Navigation Arrow Buttons (Prev / Next) */
+.tab-nav-arrow {
+  width: 19px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: bold;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tab-nav-arrow:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+.tab-nav-arrow:disabled,
+.tab-nav-arrow.disabled {
+  opacity: 0.25;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Tab Menu Dropdown Trigger */
+.tabs-menu-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tab-menu-btn {
+  height: 20px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tab-menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+.tab-menu-counter {
+  font-weight: 600;
+  font-size: 9.5px;
+  color: var(--accent-primary);
+}
+
+.tab-menu-caret {
+  font-size: 8px;
+  opacity: 0.8;
+}
+
+/* Tab Menu Floating Dropdown */
+.tabs-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.2);
+  min-width: 220px;
+  z-index: 100000;
+  padding: 5px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tabs-menu-dropdown.is-open {
+  display: flex;
+  animation: dropdown-fade 0.12s ease;
+}
+
+@keyframes dropdown-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tabs-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: all 0.12s ease;
+}
+
+.tabs-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.tabs-menu-item.active {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.tabs-menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tabs-menu-item-num {
+  font-size: 9px;
+  color: var(--text-muted);
+  opacity: 0.7;
+  font-family: var(--font-mono);
+  min-width: 12px;
+}
+
+.tabs-menu-item-check {
+  font-size: 11px;
+  color: var(--accent-primary);
+  font-weight: bold;
+}
+
+.tab-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.tab-btn.active {
+  color: var(--accent-primary);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+}
+
+.tab-content {
+  display: none;
+  height: 100%;
+}
+
+.tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.inspector-body {
+  padding: 10px 12px;
+  overflow-y: auto;
+}
+
+.registers-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.registers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.register-cell {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  padding: 5px 8px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.reg-name { color: var(--text-muted); }
+.reg-val { color: var(--accent-primary); font-weight: bold; }
+
+.pulse-changed {
+  animation: reg-pulse 0.4s ease-out;
+}
+
+@keyframes reg-pulse {
+  0% { background-color: var(--accent-secondary); color: #fff; }
+  100% { background-color: var(--bg-panel-dark); }
+}
+
+.special-registers {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.spec-cell {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  padding: 5px 6px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.spec-title { font-size: 9px; color: var(--text-muted); display: block; margin-bottom: 2px; }
+.spec-val { font-size: 11px; color: #facc15; font-weight: bold; }
+
+.stack-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-micro-title {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.stack-preview {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  min-height: 48px;
+  overflow-y: auto;
+  font-size: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stack-item { color: var(--text-muted); }
+.stack-top { color: #4ade80; font-weight: bold; }
+
+/* TTY Console */
+.tty-console {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px;
+  font-size: 10px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tty-time { color: var(--text-muted); opacity: 0.6; }
+.tty-info { color: var(--text-muted); }
+.tty-success { color: #4ade80; }
+.tty-warn { color: #facc15; }
+.tty-error { color: #f87171; }
+
+/* ROM Catalog */
+.rom-catalog-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 4px;
+}
+
+.rom-search-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.rom-catalog-list {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background-color: var(--bg-panel-dark);
+}
+
+.rom-card-item {
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.rom-card-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.rom-card-title { font-weight: 600; color: var(--text-primary); }
+.rom-card-meta { font-size: 9px; color: var(--text-muted); }
+
+/* ==========================================================================
+   EXECUTION TRACE LOG (HISTORY TAB)
+   ========================================================================== */
+#tab-content-history {
+  display: none;
+  height: 100%;
+}
+
+#tab-content-history.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.trace-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px 4px 0 0;
+  border-bottom: none;
+  font-size: 10px;
+}
+
+.trace-counter {
+  color: var(--text-muted);
+}
+
+.trace-counter strong {
+  color: var(--accent-primary);
+}
+
+.trace-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trace-autoscroll-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.trace-autoscroll-toggle input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+.trace-table-header {
+  display: grid;
+  grid-template-columns: 44px 56px 56px 110px 1fr;
+  padding: 3px 6px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.trace-log-list {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+.trace-row {
+  display: grid;
+  grid-template-columns: 44px 56px 56px 110px 1fr;
+  align-items: center;
+  padding: 2px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 10px;
+}
+
+.trace-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.trace-step { color: var(--text-muted); opacity: 0.7; }
+.trace-pc { color: #facc15; font-weight: 600; }
+.trace-op { color: var(--text-muted); }
+.trace-asm { color: var(--text-primary); font-weight: 700; }
+.trace-diff { color: #4ade80; font-weight: 600; }
+
+/* ==========================================================================
+   ACTIVE ROM TECHNICAL DETAILS CARD (ROM INFO TAB)
+   ========================================================================== */
+#tab-content-info {
+  display: none;
+  height: 100%;
+}
+
+#tab-content-info.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.rom-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.rom-info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rom-badge-pill {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  background-color: var(--accent-primary);
+  color: #fff;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.rom-header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.rom-info-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rom-info-subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.rom-info-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.spec-tile {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  padding: 3px 6px;
+  border-radius: 3px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+
+.spec-k { color: var(--text-muted); }
+.spec-v { color: var(--text-primary); font-weight: 600; }
+
+.rom-controls-box, .rom-desc-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.controls-pill-box {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 3px;
+  color: var(--accent-primary);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.rom-desc-text {
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: 1.35;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  border-radius: 3px;
+  margin: 0;
+}
+
+/* ==========================================================================
+   NES THEME HIGH-CONTRAST RETRO POLISH
+   ========================================================================== */
+[data-theme="nes"] .brand-badge-icon {
+  background-color: #ff3838;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+[data-theme="nes"] .panel-title {
+  color: #ffffff;
+}
+
+[data-theme="nes"] .tab-btn {
+  color: #d1d5db;
+}
+
+[data-theme="nes"] .tab-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="nes"] .tab-btn.active {
+  background-color: #ff3838;
+  color: #ffffff !important;
+  font-weight: 800;
+}
+
+[data-theme="nes"] .reg-val {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+[data-theme="nes"] .reg-name {
+  color: #ff7070;
+  font-weight: 700;
+}
+
+[data-theme="nes"] .spec-title {
+  color: #ff9999;
+}
+
+[data-theme="nes"] .spec-val {
+  color: #facc15;
+}
+
+[data-theme="nes"] .disasm-operands {
+  color: #ffffff;
+}
+
+[data-theme="nes"] .disasm-mnemonic {
+  color: #ff5c5c;
+  font-weight: 800;
+}
+
+[data-theme="nes"] .disasm-row.current-instruction {
+  background-color: #7f1d1d !important;
+  color: #ffffff !important;
+  border-left: 3px solid #ff3838;
+}
+
+[data-theme="nes"] .chip-fps {
+  background-color: #2a2a36;
+  color: #ff7070;
+  border: 1px solid #ff3838;
+}
+
+[data-theme="nes"] .speed-readout {
+  color: #ff7070;
+}
+
+[data-theme="nes"] .explainer-title {
+  color: #ff5c5c;
+}
+
+[data-theme="nes"] .explainer-card {
+  border-left-color: #ff3838;
+}
+
+[data-theme="nes"] .rom-badge-pill {
+  background-color: #ff3838;
+  color: #ffffff;
+}
+
+[data-theme="nes"] .trace-counter strong {
+  color: #ff7070;
+}
+
+[data-theme="nes"] .trace-pc {
+  color: #facc15;
+}
+
+[data-theme="nes"] .trace-diff {
+  color: #4ade80;
+}
+
+[data-theme="nes"] .keypad-key-btn:hover {
+  border-color: #ff3838;
+}
+
+/* Heatmap & Sprites */
+.heatmap-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+#memory-canvas {
+  width: 220px;
+  height: 220px;
+  border: 1px solid var(--border-color);
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+.heatmap-tooltip {
+  font-size: 9px;
+  color: var(--text-muted);
+  background-color: var(--bg-panel-dark);
+  padding: 2px 6px;
+  border-radius: 3px;
+  width: 100%;
+  text-align: center;
+}
+
+.heatmap-legend {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+.sprite-and-audio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.sprite-view-box, .audio-view-box {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  padding: 12px 10px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sprite-title {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+#sprite-canvas {
+  width: 96px;
+  height: 60px;
+  border: 1px solid var(--border-color);
+  image-rendering: pixelated;
+  background-color: #000;
+}
+
+#audio-osc-canvas {
+  width: 100%;
+  height: 60px;
+  border: 1px solid var(--border-color);
+  background-color: #000;
+}
+
+.micro-caption {
+  font-size: 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ==========================================================================
+   FULLSCREEN MODE: RETRO CRT TV CHASSIS & CENTERED SCREEN
+   ========================================================================== */
+
+/* 1. Fullscreen Stage Container (Native & CSS Fallback) */
+#tv-stage:fullscreen {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: radial-gradient(ellipse at center, #1c1d24 0%, #0c0d12 55%, #020204 100%) !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+#tv-stage:-webkit-full-screen {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: radial-gradient(ellipse at center, #1c1d24 0%, #0c0d12 55%, #020204 100%) !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+#tv-stage.fullscreen-tv-active {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: radial-gradient(ellipse at center, #1c1d24 0%, #0c0d12 55%, #020204 100%) !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* 2. Retro CRT TV Cabinet / Chassis */
+#tv-stage:fullscreen .crt-tv-chassis,
+#tv-stage:-webkit-full-screen .crt-tv-chassis,
+#tv-stage.fullscreen-tv-active .crt-tv-chassis {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: auto !important;
+  position: relative !important;
+  background: linear-gradient(180deg, #3d3b37 0%, #2a2825 30%, #1e1d1b 75%, #151413 100%) !important;
+  border: 4px solid #4f4b45 !important;
+  border-radius: 28px !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 120px rgba(0, 0, 0, 0.9), inset 0 2px 4px rgba(255, 255, 255, 0.2), inset 0 -4px 8px rgba(0, 0, 0, 0.8) !important;
+  padding: 16px 22px 14px 22px !important;
+  max-width: min(94vw, 1260px) !important;
+  max-height: min(92vh, 740px) !important;
+}
+
+/* 3. Top Cabinet Ridge & Ventilation Louvers */
+#tv-stage:fullscreen .tv-top-ridge,
+#tv-stage:-webkit-full-screen .tv-top-ridge,
+#tv-stage.fullscreen-tv-active .tv-top-ridge {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+}
+
+#tv-stage:fullscreen .tv-vents-group,
+#tv-stage:-webkit-full-screen .tv-vents-group,
+#tv-stage.fullscreen-tv-active .tv-vents-group {
+  display: flex !important;
+  gap: 6px !important;
+}
+
+#tv-stage:fullscreen .tv-vent-slot,
+#tv-stage:-webkit-full-screen .tv-vent-slot,
+#tv-stage.fullscreen-tv-active .tv-vent-slot {
+  width: 32px !important;
+  height: 4px !important;
+  background: #0c0b0a !important;
+  border-radius: 2px !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.08) !important;
+  display: block !important;
+}
+
+/* 4. Main TV Body (Curved Tube Housing + Control Deck) */
+#tv-stage:fullscreen .tv-main-body,
+#tv-stage:-webkit-full-screen .tv-main-body,
+#tv-stage.fullscreen-tv-active .tv-main-body {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 20px !important;
+}
+
+/* 5. CRT Tube Housing Bezel */
+#tv-stage:fullscreen .tv-tube-housing,
+#tv-stage:-webkit-full-screen .tv-tube-housing,
+#tv-stage.fullscreen-tv-active .tv-tube-housing {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #070708 !important;
+  border: 14px solid #141312 !important;
+  border-radius: 30px !important;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.98), 0 8px 24px rgba(0, 0, 0, 0.75), inset 0 2px 3px rgba(255, 255, 255, 0.08) !important;
+  padding: 6px !important;
+}
+
+#tv-stage:fullscreen .canvas-container,
+#tv-stage:-webkit-full-screen .canvas-container,
+#tv-stage.fullscreen-tv-active .canvas-container {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+/* 6. Centered Screen Canvas (Scaled to 2:1 Aspect Ratio) */
+#tv-stage:fullscreen #game-canvas,
+#tv-stage:-webkit-full-screen #game-canvas,
+#tv-stage.fullscreen-tv-active #game-canvas {
+  width: min(58vw, 90vh) !important;
+  height: calc(min(58vw, 90vh) / 2) !important;
+  max-width: 960px !important;
+  max-height: 480px !important;
+  display: block !important;
+  border-radius: 16px !important;
+  background-color: #000 !important;
+  image-rendering: pixelated !important;
+  image-rendering: crisp-edges !important;
+  margin: 0 !important;
+}
+
+/* 7. CRT Tube Glass Overlays: Scanlines, Reflections & Vignette */
+#tv-stage:fullscreen #crt-overlay,
+#tv-stage:-webkit-full-screen #crt-overlay,
+#tv-stage.fullscreen-tv-active #crt-overlay {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  pointer-events: none !important;
+  border-radius: 16px !important;
+  z-index: 4 !important;
+}
+
+#tv-stage:fullscreen .crt-glass-reflection,
+#tv-stage:-webkit-full-screen .crt-glass-reflection,
+#tv-stage.fullscreen-tv-active .crt-glass-reflection {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 16px !important;
+  pointer-events: none !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 28%, transparent 55%) !important;
+  z-index: 5 !important;
+}
+
+#tv-stage:fullscreen .crt-glass-vignette,
+#tv-stage:-webkit-full-screen .crt-glass-vignette,
+#tv-stage.fullscreen-tv-active .crt-glass-vignette {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 16px !important;
+  pointer-events: none !important;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 0, 0, 0.9) !important;
+  z-index: 6 !important;
+}
+
+/* 8. Retro TV Control Panel (Right Side) */
+#tv-stage:fullscreen .tv-control-panel,
+#tv-stage:-webkit-full-screen .tv-control-panel,
+#tv-stage.fullscreen-tv-active .tv-control-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  width: 145px !important;
+  align-self: stretch !important;
+  background: linear-gradient(180deg, #2b2825 0%, #1e1d1b 45%, #151413 100%) !important;
+  border: 2px solid #3f3c36 !important;
+  border-radius: 12px !important;
+  padding: 12px 10px !important;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+#tv-stage:fullscreen .tv-brand-plate,
+#tv-stage:-webkit-full-screen .tv-brand-plate,
+#tv-stage.fullscreen-tv-active .tv-brand-plate {
+  background: linear-gradient(135deg, #d4af37 0%, #b89728 50%, #f3d778 100%) !important;
+  border: 1px solid #7d6516 !important;
+  border-radius: 4px !important;
+  padding: 5px 6px !important;
+  text-align: center !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4) !important;
+  margin-bottom: 6px !important;
+}
+
+#tv-stage:fullscreen .tv-brand-logo,
+#tv-stage:-webkit-full-screen .tv-brand-logo,
+#tv-stage.fullscreen-tv-active .tv-brand-logo {
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #1f1803 !important;
+  letter-spacing: 0.8px !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3) !important;
+}
+
+#tv-stage:fullscreen .tv-brand-model,
+#tv-stage:-webkit-full-screen .tv-brand-model,
+#tv-stage.fullscreen-tv-active .tv-brand-model {
+  font-size: 7px !important;
+  font-weight: 700 !important;
+  color: #3b2f0a !important;
+  letter-spacing: 0.5px !important;
+  margin-top: 1px !important;
+}
+
+#tv-stage:fullscreen .tv-speaker-section,
+#tv-stage:-webkit-full-screen .tv-speaker-section,
+#tv-stage.fullscreen-tv-active .tv-speaker-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  margin: 8px 0 !important;
+  padding: 6px !important;
+  background: #0f0e0d !important;
+  border-radius: 4px !important;
+  border: 1px solid #292724 !important;
+}
+
+#tv-stage:fullscreen .tv-speaker-slat,
+#tv-stage:-webkit-full-screen .tv-speaker-slat,
+#tv-stage.fullscreen-tv-active .tv-speaker-slat {
+  height: 3px !important;
+  background: #050505 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 1px !important;
+  display: block !important;
+}
+
+#tv-stage:fullscreen .tv-dials-section,
+#tv-stage:-webkit-full-screen .tv-dials-section,
+#tv-stage.fullscreen-tv-active .tv-dials-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin: 6px 0 !important;
+}
+
+#tv-stage:fullscreen .tv-dial-control,
+#tv-stage:-webkit-full-screen .tv-dial-control,
+#tv-stage.fullscreen-tv-active .tv-dial-control {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+#tv-stage:fullscreen .tv-dial-tag,
+#tv-stage:-webkit-full-screen .tv-dial-tag,
+#tv-stage.fullscreen-tv-active .tv-dial-tag {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  color: #b8b3a8 !important;
+  letter-spacing: 0.5px !important;
+  font-family: var(--font-mono) !important;
+}
+
+#tv-stage:fullscreen .tv-knob,
+#tv-stage:-webkit-full-screen .tv-knob,
+#tv-stage.fullscreen-tv-active .tv-knob {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #4a4742 0%, #292724 60%, #151413 100%) !important;
+  border: 2px solid #5a564f !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.25) !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+#tv-stage:fullscreen .tv-knob-notch,
+#tv-stage:-webkit-full-screen .tv-knob-notch,
+#tv-stage.fullscreen-tv-active .tv-knob-notch {
+  width: 3px !important;
+  height: 12px !important;
+  background: #fff !important;
+  border-radius: 2px !important;
+  position: absolute !important;
+  top: 3px !important;
+  box-shadow: 0 0 4px rgba(255,255,255,0.8) !important;
+  display: block !important;
+}
+
+#tv-stage:fullscreen .tv-power-cluster,
+#tv-stage:-webkit-full-screen .tv-power-cluster,
+#tv-stage.fullscreen-tv-active .tv-power-cluster {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 6px !important;
+  padding-top: 8px !important;
+  border-top: 1px dashed #3d3a35 !important;
+}
+
+#tv-stage:fullscreen .tv-power-indicator,
+#tv-stage:-webkit-full-screen .tv-power-indicator,
+#tv-stage.fullscreen-tv-active .tv-power-indicator {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+#tv-stage:fullscreen .tv-led-indicator,
+#tv-stage:-webkit-full-screen .tv-led-indicator,
+#tv-stage.fullscreen-tv-active .tv-led-indicator {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background-color: #39ff14 !important;
+  box-shadow: 0 0 8px #39ff14, 0 0 16px rgba(57, 255, 20, 0.6) !important;
+  animation: tvLedGlow 2.5s infinite ease-in-out !important;
+  display: inline-block !important;
+}
+
+#tv-stage:fullscreen .tv-led-label,
+#tv-stage:-webkit-full-screen .tv-led-label,
+#tv-stage.fullscreen-tv-active .tv-led-label {
+  font-size: 8px !important;
+  font-weight: bold !important;
+  color: #8c8880 !important;
+  font-family: var(--font-mono) !important;
+}
+
+#tv-stage:fullscreen .tv-power-switch,
+#tv-stage:-webkit-full-screen .tv-power-switch,
+#tv-stage.fullscreen-tv-active .tv-power-switch {
+  background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%) !important;
+  color: #fff !important;
+  border: 1px solid #ef4444 !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  font-size: 8px !important;
+  font-weight: bold !important;
+  font-family: var(--font-mono) !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  transition: all 0.15s ease !important;
+}
+
+#tv-stage:fullscreen .tv-power-switch:hover,
+#tv-stage:-webkit-full-screen .tv-power-switch:hover,
+#tv-stage.fullscreen-tv-active .tv-power-switch:hover {
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%) !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6) !important;
+}
+
+/* 9. Bottom TV Chassis & Support Feet */
+#tv-stage:fullscreen .tv-bottom-chassis,
+#tv-stage:-webkit-full-screen .tv-bottom-chassis,
+#tv-stage.fullscreen-tv-active .tv-bottom-chassis {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+}
+
+#tv-stage:fullscreen .tv-chassis-decal,
+#tv-stage:-webkit-full-screen .tv-chassis-decal,
+#tv-stage.fullscreen-tv-active .tv-chassis-decal {
+  font-size: 8px !important;
+  color: #858077 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  font-family: var(--font-mono) !important;
+  opacity: 0.75 !important;
+  margin-bottom: 6px !important;
+}
+
+#tv-stage:fullscreen .tv-cabinet-feet,
+#tv-stage:-webkit-full-screen .tv-cabinet-feet,
+#tv-stage.fullscreen-tv-active .tv-cabinet-feet {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 80% !important;
+}
+
+#tv-stage:fullscreen .tv-foot,
+#tv-stage:-webkit-full-screen .tv-foot,
+#tv-stage.fullscreen-tv-active .tv-foot {
+  width: 54px !important;
+  height: 6px !important;
+  background: #0d0c0b !important;
+  border-radius: 0 0 4px 4px !important;
+  border: 1px solid #292724 !important;
+  border-top: none !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+  display: block !important;
+}
+
+/* 10. Floating Escape Notification Toast */
+#tv-stage:fullscreen .tv-exit-toast,
+#tv-stage:-webkit-full-screen .tv-exit-toast,
+#tv-stage.fullscreen-tv-active .tv-exit-toast {
+  display: block !important;
+  position: absolute !important;
+  top: -38px !important;
+  color: #a3a3a3 !important;
+  font-size: 11px !important;
+  font-family: var(--font-mono) !important;
+  background: rgba(0,0,0,0.7) !important;
+  padding: 4px 14px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  pointer-events: none !important;
+  backdrop-filter: blur(4px) !important;
+  white-space: nowrap !important;
+}
+
+@keyframes tvLedGlow {
+  0%, 100% {
+    opacity: 0.85;
+    box-shadow: 0 0 6px #39ff14, 0 0 12px rgba(57, 255, 20, 0.4);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57, 255, 20, 0.8);
+  }
+}
+
+/* Responsive adjustment for compact screens in TV Fullscreen */
+@media (max-width: 768px) {
+  #tv-stage:fullscreen .tv-main-body,
+  #tv-stage:-webkit-full-screen .tv-main-body,
+  #tv-stage.fullscreen-tv-active .tv-main-body {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  #tv-stage:fullscreen .tv-control-panel,
+  #tv-stage:-webkit-full-screen .tv-control-panel,
+  #tv-stage.fullscreen-tv-active .tv-control-panel {
+    width: 100% !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  #tv-stage:fullscreen .tv-speaker-section,
+  #tv-stage:-webkit-full-screen .tv-speaker-section,
+  #tv-stage.fullscreen-tv-active .tv-speaker-section {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   SAVE STATES MODAL
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-backdrop.visible {
+  display: flex;
+}
+
+.modal-window {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+}
+
+.modal-header {
+  background-color: var(--bg-panel-dark);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.save-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.slot-card {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slot-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.slot-thumb {
+  height: 55px;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.slot-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.empty-thumb {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.slot-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.slot-actions button {
+  flex: 1;
+  padding: 3px;
+  border-radius: 3px;
+  border: 1px solid var(--border-color);
+  background-color: var(--btn-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.slot-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.modal-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* ========================================================================== */
+/* SHORTCUTS & CONTROLS MAPPING MODAL                                         */
+/* ========================================================================== */
+.shortcuts-window {
+  width: 760px;
+  max-width: 95vw;
+}
+
+.shortcuts-body {
+  padding: 16px;
+  gap: 14px;
+}
+
+.modal-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortcuts-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .shortcuts-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shortcut-box {
+  background-color: var(--bg-panel-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut-box-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shortcut-box-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.keypad-matrix-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.keypad-reference-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.keypad-reference-table th {
+  text-align: left;
+  padding: 4px 6px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.keypad-reference-table td {
+  padding: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.keypad-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.shortcuts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.shortcuts-table td {
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shortcuts-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-bright);
+  background-color: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}

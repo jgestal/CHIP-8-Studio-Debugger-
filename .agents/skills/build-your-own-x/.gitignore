@@ -1,0 +1,9 @@
+**/__pycache__
+**/media
+.claude/skills
+.gemini/skills
+.trae/skills
+.codebuddy/skills
+output
+.DS_Store
+**/.DS_Store

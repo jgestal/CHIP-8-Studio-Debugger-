@@ -1,0 +1,93 @@
+---
+name: misc-dmidecode
+description: |
+  Trigger when the user wants to learn, implement, debug, or extend a build-your-own project for 未分类 using Nim. Use when they mention "build your own misc", "编写 DMIDecode 解析器", the source URL, or ask for a Claude Code guided implementation plan.
+
+  Guides the user through a project-based learning workflow: inspect prerequisites, create or adapt a minimal project, implement milestones, run verification commands, and debug failures without simply dumping a full finished solution.
+---
+
+# 编写 DMIDecode 解析器
+
+Use this skill as a Claude Code project coach for converting the original build-your-own tutorial into an interactive implementation experience.
+
+## Source
+
+- **Category**: 未分类
+- **Language / stack**: Nim
+- **Original resource**: https://xmonader.github.io/nimdays/day01_dmidecode.html
+- **Original status**: not yet converted in README
+
+## Operating principles
+
+- Prefer learning-by-building: explain the next small concept, then make the smallest useful code change.
+- Preserve the user's existing project structure. Inspect files before editing and avoid replacing working code wholesale.
+- Use tests, executable examples, or observable outputs at every milestone.
+- If the user asks for a full implementation, first offer a staged path and provide complete code only for the current milestone.
+- For long tutorials, load only the relevant reference section for the current milestone.
+- Stay inside the project directory: every download, log, scratch file and smoke-test output goes under the project (for example `./scratch/`, `./logs/`), never `/tmp`, `$HOME` or another absolute path. Never install packages or create virtualenvs yourself (no `pip`, `brew`, `apt`, `cargo`, `npm -g`, `go install`, including via a venv's `bin/pip`); print the command for the user instead.
+- Keep the final reply concise (aim for under ~60 lines) and always finish it with the checkpoint: the exact command to run and the expected output.
+
+## Workflow
+
+### 1. Establish context
+
+1. Identify whether the user is starting from an empty directory, continuing a partial implementation, or debugging a failing project.
+2. Detect the target language/toolchain. Default to **Nim** when the user does not specify another stack.
+3. Check available build tools and create a minimal runnable project only when needed.
+4. Read `references/tutorial-map.md` for the milestone map before planning detailed work.
+
+### 2. Plan milestones
+
+Guide the project through these generic milestones and adapt them to the tutorial:
+
+1. **Project skeleton** — files, build command, first runnable program.
+2. **Core data model** — key structs/classes/types and invariants.
+3. **Parser or input layer** — commands, file formats, protocol frames, or scene/input handling.
+4. **Core algorithm / engine** — the central behavior of the project.
+5. **Persistence / networking / rendering / runtime integration** — domain-specific integration.
+6. **Testing and diagnostics** — unit tests, golden outputs, fixtures, or manual verification.
+7. **Extensions** — performance, robustness, UX, and production-readiness improvements.
+
+### 3. Implement with guardrails
+
+- Before edits, summarize the intended change and files affected.
+- Keep patches small enough for the user to understand.
+- Explain important design choices and tradeoffs at the point they matter.
+- After each edit, run the relevant verification command when available.
+- When a command fails, diagnose from the error message and fix the smallest likely cause.
+
+### 4. Debugging mode
+
+When the user provides failing tests, logs, or code:
+
+1. Reproduce or reason about the failure.
+2. Identify the milestone and concept involved.
+3. Explain the invariant being violated.
+4. Apply a minimal fix.
+5. Add or update a regression test if appropriate.
+
+### 5. Converting the tutorial into a task list
+
+When the user asks to convert, summarize, or "taskify" the original tutorial:
+
+1. Build the list from `references/tutorial-map.md` and `references/concepts.md` first; they are the offline source of truth.
+2. Fetch the original resource at most once or twice (README / table of contents only) and only if the references lack a detail. Never crawl the whole tutorial, and never download into `/tmp` or anywhere outside the project directory.
+3. Deliver promptly: write the task list (e.g. `TASKS.md` in the project) with one entry per milestone — goal, files to touch, key concept, and a verification command with expected output.
+4. End the reply with the first runnable checkpoint (the exact command to run for milestone 1 and what the user should see).
+
+## References
+
+- `references/tutorial-map.md` — source-to-milestone conversion map.
+- `references/concepts.md` — core concepts and implementation checklist.
+- `examples/minimal/README.md` — minimal project scaffold guidance.
+- `evals/evals.json` — prompts for validating this skill.
+
+## Expected outputs
+
+Depending on the user's request, produce one of:
+
+- A staged implementation plan.
+- A minimal project scaffold.
+- A focused code patch for the current milestone.
+- A debugging explanation plus fix.
+- A test plan and verification commands.
