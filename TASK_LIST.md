@@ -158,5 +158,14 @@
     - Created `CONTRIBUTING.md` with guidelines for community contributions, new ROM submissions, and bug reports.
     - Verified all 24/24 unit test suites passing cleanly.
 
-
-
+- [x] **Phase 13: Multi-Theme Real Screenshot Suite & Remote Repository Synchronization**
+  - [x] Fixed theme query parameter initialization bug in `js/app.js` (`#select-theme`).
+  - [x] Captured 6 real high-definition theme screenshots in `docs/assets/`:
+    - `theme-terminal.png` (Terminal Green VT220 Phosphor)
+    - `theme-gameboy.png` (Game Boy DMG-01)
+    - `theme-nes.png` (NES Classic 1983)
+    - `theme-snes.png` (SNES Super Famicom)
+    - `theme-cyberpunk.png` (Cyberpunk Synthwave)
+    - `theme-massung.png` (Jeffrey Massung Slate)
+  - [x] Integrated 2-column visual theme comparison matrix in both `README.md` and `README.es.md`.
+  - [x] Synchronized codebase and media assets with remote repository `https://github.com/jgestal/CHIP-8-Studio-Debugger.git`.

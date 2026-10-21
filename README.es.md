@@ -69,11 +69,15 @@ Examina paso a paso cada instrucción con explicaciones comprensibles y visualiz
 </p>
 
 ### 6 Temáticas Retro Dinámicas
-Cambia de estética en tiempo real con un solo clic:
+Cambia de estética en tiempo real con un solo clic sin reiniciar la partida ni perder el estado:
 
-<p align="center">
-  <img src="docs/assets/05-themes-showcase.png" alt="Muestra de Temática NES" width="100%">
-</p>
+| **Terminal Verde (Fósforo VT220)** | **Game Boy (DMG-01 1989)** |
+|:---:|:---:|
+| [![Temática Terminal Verde](docs/assets/theme-terminal.png)](docs/assets/theme-terminal.png) | [![Temática Game Boy](docs/assets/theme-gameboy.png)](docs/assets/theme-gameboy.png) |
+| **NES Classic (Nintendo 1983)** | **SNES Super Famicom (1990)** |
+| [![Temática NES Classic](docs/assets/theme-nes.png)](docs/assets/theme-nes.png) | [![Temática SNES Super Famicom](docs/assets/theme-snes.png)](docs/assets/theme-snes.png) |
+| **Cyberpunk (Outrun Synthwave)** | **Jeffrey Massung Slate (1977)** |
+| [![Temática Cyberpunk](docs/assets/theme-cyberpunk.png)](docs/assets/theme-cyberpunk.png) | [![Temática Massung Slate](docs/assets/theme-massung.png)](docs/assets/theme-massung.png) |
 
 ---
 

@@ -68,12 +68,16 @@ Inspect executed instructions step-by-step with plain-English descriptions and r
   <img src="docs/assets/04-disassembler-explainer.png" alt="Live Disassembler and Natural Language Explainer" width="100%">
 </p>
 
-### 6 Retro Color Themes
-Switch aesthetics instantly without restarting your game:
+### 6 Curated Retro Color Themes
+Switch visual aesthetics instantly in real time without restarting your game or losing machine state:
 
-<p align="center">
-  <img src="docs/assets/05-themes-showcase.png" alt="NES Theme Showcase" width="100%">
-</p>
+| **Terminal Green (VT220 Phosphor)** | **Game Boy (DMG-01 1989)** |
+|:---:|:---:|
+| [![Terminal Green Theme](docs/assets/theme-terminal.png)](docs/assets/theme-terminal.png) | [![Game Boy Theme](docs/assets/theme-gameboy.png)](docs/assets/theme-gameboy.png) |
+| **NES Classic (1983 Nintendo)** | **SNES Super Famicom (1990)** |
+| [![NES Classic Theme](docs/assets/theme-nes.png)](docs/assets/theme-nes.png) | [![SNES Super Famicom Theme](docs/assets/theme-snes.png)](docs/assets/theme-snes.png) |
+| **Cyberpunk (Outrun Synthwave)** | **Jeffrey Massung Slate (1977)** |
+| [![Cyberpunk Synthwave Theme](docs/assets/theme-cyberpunk.png)](docs/assets/theme-cyberpunk.png) | [![Massung Slate Theme](docs/assets/theme-massung.png)](docs/assets/theme-massung.png) |
 
 ---
 

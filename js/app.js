@@ -106,7 +106,7 @@ export class App {
     const requestedTheme = urlParams.get('theme');
     if (requestedTheme && this.themeManager) {
       this.themeManager.applyTheme(requestedTheme);
-      const themeSelect = document.getElementById('theme-select');
+      const themeSelect = document.getElementById('select-theme');
       if (themeSelect) themeSelect.value = requestedTheme;
     }
     const requestedTab = urlParams.get('tab');
